@@ -2,6 +2,7 @@ package main
 
 import (
 	"blan-backend/api"
+	"blan-backend/runner"
 	"log"
 	"time"
 
@@ -11,6 +12,9 @@ import (
 )
 
 func main() {
+
+	runner.InitWorkerPool(3, 100)
+
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
@@ -24,6 +28,7 @@ func main() {
 
 	v1 := r.Group("/api/v1")
 	v1.POST("/compile", api.CompileHandler)
+	v1.GET("/status/:id", api.StatusHandler)
 
 	log.Println("Blan Backend is running on port 8080..")
 	r.Run(":8080")

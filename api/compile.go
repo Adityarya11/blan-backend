@@ -16,18 +16,27 @@ func CompileHandler(g *gin.Context) {
 		return
 	}
 
-	output, err := runner.RunSource(req.SourceCode)
+	jobID := runner.EnqueueJob(req.SourceCode)
 
-	if err != nil {
-		g.JSON(http.StatusOK, models.CompileResponse{
-			Output: "",
-			Error:  err.Error(),
-		})
+	g.JSON(http.StatusAccepted, models.CompileAcceptedResponse{
+		ID:     jobID,
+		Status: string(runner.JobQueued),
+	})
+}
+
+func StatusHandler(g *gin.Context) {
+	jobID := g.Param("id")
+
+	record, ok := runner.GetJob(jobID)
+	if !ok {
+		g.JSON(http.StatusNotFound, gin.H{"error": "job not found"})
 		return
 	}
 
-	g.JSON(http.StatusOK, models.CompileResponse{
-		Output: output,
-		Error:  "",
+	g.JSON(http.StatusOK, models.JobStatusResponse{
+		ID:     jobID,
+		Status: string(record.Status),
+		Output: record.Output,
+		Error:  record.Error,
 	})
 }

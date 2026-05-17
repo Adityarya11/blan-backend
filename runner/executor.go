@@ -36,7 +36,7 @@ func RunSource(sourceCode string) (string, error) {
 	err = cmd.Run()
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return "", fmt.Errorf("CHUDDI!, Execution timeout, infinite loop hai re lodu.")
+		return "", fmt.Errorf("CHUDDI!, Execution timeout, infinite loop hai re bhai.")
 	}
 
 	if err != nil {
