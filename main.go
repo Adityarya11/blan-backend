@@ -2,16 +2,27 @@ package main
 
 import (
 	"blan-backend/api"
+	"blan-backend/database"
 	"blan-backend/runner"
 	"log"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	// "github.com/rs/cors"
 )
 
 func main() {
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error with the env: %v", err)
+	}
+
+	dbconnect := os.Getenv("DATABASE_URL")
+	database.Connect(dbconnect)
 
 	runner.InitWorkerPool(3, 100)
 
