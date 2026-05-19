@@ -3,6 +3,7 @@ package main
 import (
 	"blan-backend/api"
 	"blan-backend/database"
+	"blan-backend/middleware"
 	"blan-backend/runner"
 	"log"
 	"os"
@@ -40,6 +41,16 @@ func main() {
 	v1 := r.Group("/api/v1")
 	v1.POST("/compile", api.CompileHandler)
 	v1.GET("/status/:id", api.StatusHandler)
+
+	//auth routes
+	v1.POST("/signup", api.SignupHandler)
+	v1.POST("/login", api.LoginHandler)
+
+	secured := v1.Group("/snippets")
+	secured.Use(middleware.AuthMiddleware())
+	{
+		secured.POST("/", api.CreateSnippetHandler)
+	}
 
 	log.Println("Blan Backend is running on port 8080..")
 	r.Run(":8080")
