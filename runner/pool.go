@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"blan-backend/cache"
 	"log"
 	"sync"
 
@@ -25,6 +26,7 @@ type JobRecord struct {
 type CompileJob struct {
 	ID         string
 	SourceCode string
+	HashKey    string
 }
 
 var (
@@ -43,14 +45,18 @@ func InitWorkerPool(maxWorkers, maxQueueSize int) {
 	log.Printf("wrker pool started with %d workers", maxWorkers)
 }
 
-func EnqueueJob(sourceCode string) string {
+func EnqueueJob(sourceCode, hashKey string) string {
 	jobID := uuid.New().String()
 
 	jobsMu.Lock()
 	jobs[jobID] = &JobRecord{Status: JobQueued}
 	jobsMu.Unlock()
 
-	JobQueue <- CompileJob{ID: jobID, SourceCode: sourceCode}
+	JobQueue <- CompileJob{
+		ID:         jobID,
+		SourceCode: sourceCode,
+		HashKey:    hashKey,
+	}
 
 	return jobID
 }
@@ -87,11 +93,14 @@ func worker(id int, jobs <-chan CompileJob) {
 		log.Printf("worker %d started working...", id)
 
 		updateJob(job.ID, JobRunning, "", "")
+
 		output, err := RunSource(job.SourceCode)
+
 		if err != nil {
 			updateJob(job.ID, JobFailed, "", err.Error())
 		} else {
 			updateJob(job.ID, JobCompleted, output, "")
+			cache.SaveCacheOutput(job.HashKey, output) // this saves the cache in strata.
 		}
 
 		log.Printf("worker %d completed the task...", id)

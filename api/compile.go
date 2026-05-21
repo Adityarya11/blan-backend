@@ -1,8 +1,10 @@
 package api
 
 import (
+	"blan-backend/cache"
 	"blan-backend/models"
 	"blan-backend/runner"
+	"blan-backend/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +18,18 @@ func CompileHandler(g *gin.Context) {
 		return
 	}
 
-	jobID := runner.EnqueueJob(req.SourceCode)
+	hashKey := utils.GenerateCacheKey(req.SourceCode)
+	if cacheOutput, exists := cache.GetCachedOutput(hashKey); exists {
+		g.JSON(http.StatusOK, models.CompileResponse{
+			Output: cacheOutput,
+			Error:  "",
+			// feature, add a `cached` flag (bool) to check/show that the response was from cached mem.
+		})
+
+		return
+	}
+
+	jobID := runner.EnqueueJob(req.SourceCode, hashKey)
 
 	g.JSON(http.StatusAccepted, models.CompileAcceptedResponse{
 		ID:     jobID,

@@ -2,6 +2,7 @@ package main
 
 import (
 	"blan-backend/api"
+	"blan-backend/cache"
 	"blan-backend/database"
 	"blan-backend/middleware"
 	"blan-backend/runner"
@@ -12,7 +13,6 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	// "github.com/rs/cors"
 )
 
 func main() {
@@ -24,6 +24,9 @@ func main() {
 
 	dbconnect := os.Getenv("DATABASE_URL")
 	database.Connect(dbconnect)
+
+	cache.InitStrataKV("./strata_cache_data")
+	defer cache.CloseStrata()
 
 	runner.InitWorkerPool(3, 100)
 
@@ -41,6 +44,7 @@ func main() {
 	v1 := r.Group("/api/v1")
 	v1.POST("/compile", api.CompileHandler)
 	v1.GET("/status/:id", api.StatusHandler)
+	// v1.GET("/health/strata", api.StrataHealthHandler)
 
 	//auth routes
 	v1.POST("/signup", api.SignupHandler)
