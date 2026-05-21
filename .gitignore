@@ -1,5 +1,7 @@
 test.bl
-diffs
 .env
 
 docs
+diffs
+strata_cache_data
+*.diff

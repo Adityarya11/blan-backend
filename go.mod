@@ -3,6 +3,7 @@ module blan-backend
 go 1.26.3
 
 require (
+	github.com/Adityarya11/StrataKV v0.0.0-20260519133129-8a3cb3168647
 	github.com/gin-contrib/cors v1.7.7
 	github.com/gin-gonic/gin v1.12.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
@@ -47,3 +48,5 @@ require (
 	golang.org/x/text v0.37.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 )
+
+replace github.com/Adityarya11/StrataKV => ../StrataKV
