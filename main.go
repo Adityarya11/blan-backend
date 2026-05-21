@@ -44,7 +44,7 @@ func main() {
 	v1 := r.Group("/api/v1")
 	v1.POST("/compile", api.CompileHandler)
 	v1.GET("/status/:id", api.StatusHandler)
-	// v1.GET("/health/strata", api.StrataHealthHandler)
+	v1.GET("/health/strata", api.StrataHealthHandler)
 
 	//auth routes
 	v1.POST("/signup", api.SignupHandler)
