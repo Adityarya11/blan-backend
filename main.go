@@ -54,6 +54,7 @@ func main() {
 	secured.Use(middleware.AuthMiddleware())
 	{
 		secured.POST("/", api.CreateSnippetHandler)
+		secured.GET("/", api.GetSnippetHandler)
 	}
 
 	log.Println("Blan Backend is running on port 8080..")
