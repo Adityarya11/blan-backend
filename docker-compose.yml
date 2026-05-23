@@ -5,10 +5,10 @@ services:
     image: mysql:8.0
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-blandb}
-      MYSQL_USER: ${MYSQL_USER:-blanuser}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-blanpass}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "${DB_PORT:-3306}:3306"
     volumes:
@@ -22,7 +22,7 @@ services:
           "ping",
           "-h",
           "127.0.0.1",
-          "-p${MYSQL_ROOT_PASSWORD:-rootpassword}",
+          "-p${MYSQL_ROOT_PASSWORD}",
         ]
       interval: 10s
       timeout: 5s
@@ -35,7 +35,7 @@ services:
       - "${APP_PORT:-8080}:8080"
     environment:
       # Connects directly to the 'db' service alias
-      DATABASE_URL: "${MYSQL_USER:-blanuser}:${MYSQL_PASSWORD:-blanpass}@tcp(db:3306)/${MYSQL_DATABASE:-blandb}?charset=utf8mb4&parseTime=True&loc=Local"
+      DATABASE_URL: "${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(db:3306)/${MYSQL_DATABASE}?charset=utf8mb4&parseTime=True&loc=Local"
     depends_on:
       db:
         condition: service_healthy
