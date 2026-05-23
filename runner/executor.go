@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/google/uuid"
@@ -26,7 +27,12 @@ func RunSource(sourceCode string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "./blan.exe", filePath)
+	binaryName := "blan"
+	if runtime.GOOS == "windows" {
+		binaryName = "./blan.exe"
+	}
+
+	cmd := exec.CommandContext(ctx, binaryName, filePath)
 
 	var out bytes.Buffer
 	var stderr bytes.Buffer

@@ -19,7 +19,8 @@ func main() {
 
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Error with the env: %v", err)
+		// log.Fatalf("Error with the env: %v", err) // wont work with the docker
+		log.Println("No .env file found, relying on the system environments.")
 	}
 
 	dbconnect := os.Getenv("DATABASE_URL")
