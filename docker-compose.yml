@@ -1,0 +1,51 @@
+# version: "3.8"
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-blandb}
+      MYSQL_USER: ${MYSQL_USER:-blanuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-blanpass}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      # Ping the database to ensure it's actually ready before the Go app connects
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "127.0.0.1",
+          "-p${MYSQL_ROOT_PASSWORD:-rootpassword}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    environment:
+      # Connects directly to the 'db' service alias
+      DATABASE_URL: "${MYSQL_USER:-blanuser}:${MYSQL_PASSWORD:-blanpass}@tcp(db:3306)/${MYSQL_DATABASE:-blandb}?charset=utf8mb4&parseTime=True&loc=Local"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # PERSISTENCE: Keep StrataKV cache data safe across restarts
+      - strata_data:/app/strata_cache_data
+    tmpfs:
+      # SPEED: Map the workspace to RAM. Temp code files write/execute instantly.
+      - /app/workspace
+
+volumes:
+  db_data:
+  strata_data:
