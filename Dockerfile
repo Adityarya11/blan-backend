@@ -1,20 +1,17 @@
-# syntax=docker/dockerfile:1.4
-
 # ==========================================
 # STAGE 1: Build the Go Backend
 # ==========================================
-FROM golang:1.26.3-bookworm AS builder
+FROM golang:1.26-bookworm AS builder
 WORKDIR /app
 
 # Cache Go modules for faster rebuilds
 COPY go.mod go.sum ./
-RUN --mount=type=cache,target=/go/pkg/mod go mod download
+RUN go mod download
 
 COPY . .
 
 # Build a highly optimized, static Go binary
-RUN --mount=type=cache,target=/root/.cache/go-build \
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 	go build -trimpath -ldflags "-s -w" -o /app/blan-server ./main.go
 
 # ==========================================
@@ -27,7 +24,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends libc6 libstdc++6 ca-certificates \
 	&& rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user for security (prevents container escape vulnerabilities)
+# Create a non-root user for security
 RUN addgroup --system app && adduser --system --ingroup app appuser
 
 # Copy Go API and the C++ binary
