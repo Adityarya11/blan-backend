@@ -4,15 +4,15 @@ This is the Go backend for the [Blan Compiler](https://github.com/Adityarya11/Co
 
 The API is intentionally small and built around a single compile queue, polling for results, and a JWT-protected snippets surface. All routes below are under `/api/v1`.
 
-| Route                       | Type      | Headers                                                           | Content                                             | Description                                |
-| --------------------------- | --------- | ----------------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------ |
-| `POST /api/v1/compile`      | Public    | `Content-Type: application/json`                                  | `{"source_code":"..."}`                             | Enqueue a compile job and return a job id. |
-| `GET /api/v1/status/:id`    | Public    | None                                                              | None                                                | Fetch job status and output by id.         |
-| `GET /api/v1/health/strata` | Public    | None                                                              | None                                                | Read/write probe for StrataKV readiness.   |
-| `POST /api/v1/signup`       | Public    | `Content-Type: application/json`                                  | `{"username":"...","email":"...","password":"..."}` | Create a user account.                     |
-| `POST /api/v1/login`        | Public    | `Content-Type: application/json`                                  | `{"email":"...","password":"..."}`                  | Issue a JWT token.                         |
-| `POST /api/v1/snippets/`    | Protected | `Authorization: Bearer <token>`, `Content-Type: application/json` | `{"source":"..."}`                                  | Save a snippet for the current user.       |
-| `GET /api/v1/snippets/`     | Protected | `Authorization: Bearer <token>`                                   | None                                                | List saved snippets for the current user.  |
+| Route                       | Type      | Headers                                                           | Body | Description                                                                               |
+| --------------------------- | --------- | ----------------------------------------------------------------- | ---- | ----------------------------------------------------------------------------------------- |
+| `POST /api/v1/compile`      | Public    | `Content-Type: application/json`                                  | JSON | Enqueue a compile job. Body: `{"source_code":"..."}`. Returns a job id.                   |
+| `GET /api/v1/status/:id`    | Public    | None                                                              | None | Fetch job status and output by id. Returns `queued`, `running`, `completed`, or `failed`. |
+| `GET /api/v1/health/strata` | Public    | None                                                              | None | Read/write probe for StrataKV readiness and timestamped status.                           |
+| `POST /api/v1/signup`       | Public    | `Content-Type: application/json`                                  | JSON | Create a user account. Body: `{"username":"...","email":"...","password":"..."}`.         |
+| `POST /api/v1/login`        | Public    | `Content-Type: application/json`                                  | JSON | Issue a JWT token. Body: `{"email":"...","password":"..."}`.                              |
+| `POST /api/v1/snippets/`    | Protected | `Authorization: Bearer <token>`, `Content-Type: application/json` | JSON | Save a snippet for the current user. Body: `{"source":"..."}`.                            |
+| `GET /api/v1/snippets/`     | Protected | `Authorization: Bearer <token>`                                   | None | List saved snippets for the current user, with count and items.                           |
 
 ---
 

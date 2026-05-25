@@ -7,6 +7,7 @@ import (
 	"blan-backend/middleware"
 	"blan-backend/runner"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -46,6 +47,13 @@ func main() {
 	v1.POST("/compile", api.CompileHandler)
 	v1.GET("/status/:id", api.StatusHandler)
 	v1.GET("/health/strata", api.StrataHealthHandler)
+
+	v1.GET("/health", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{
+			"status": "alive",
+			"time":   time.Now().UTC().Format(time.RFC3339),
+		})
+	})
 
 	//auth routes
 	v1.POST("/signup", api.SignupHandler)
