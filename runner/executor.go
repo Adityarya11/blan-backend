@@ -29,10 +29,11 @@ func RunSource(sourceCode string) (string, error) {
 
 	binaryName := "blan"
 	if runtime.GOOS == "windows" {
-		binaryName = "./blan.exe"
+		binaryName = "blan.exe"
 	}
+	binaryPath := filepath.Join(".", binaryName)
 
-	cmd := exec.CommandContext(ctx, binaryName, filePath)
+	cmd := exec.CommandContext(ctx, binaryPath, filePath)
 
 	var out bytes.Buffer
 	var stderr bytes.Buffer
@@ -42,7 +43,7 @@ func RunSource(sourceCode string) (string, error) {
 	err = cmd.Run()
 
 	if ctx.Err() == context.DeadlineExceeded {
-		return "", fmt.Errorf("CHUDDI!, Execution timeout, infinite loop hai re bhai.")
+		return "", fmt.Errorf("execution timeout: possible infinite loop")
 	}
 
 	if err != nil {
