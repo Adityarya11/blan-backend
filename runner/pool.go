@@ -2,6 +2,7 @@ package runner
 
 import (
 	"blan-backend/cache"
+	"fmt"
 	"log"
 	"sync"
 
@@ -94,13 +95,15 @@ func worker(id int, jobs <-chan CompileJob) {
 
 		updateJob(job.ID, JobRunning, "", "")
 
-		output, err := RunSource(job.SourceCode)
+		stdout, stderr, err := RunSource(job.SourceCode)
 
 		if err != nil {
-			updateJob(job.ID, JobFailed, "", err.Error())
+			log.Printf("worker %d exec error: %v | stdout: %s | stderr: %s", id, err, stdout, stderr)
+			updateJob(job.ID, JobFailed, stdout, fmt.Sprintf("%v\n%s", err, stderr))
+			continue
 		} else {
-			updateJob(job.ID, JobCompleted, output, "")
-			cache.SaveCacheOutput(job.HashKey, output) // this saves the cache in strata.
+			updateJob(job.ID, JobCompleted, stdout, "")
+			cache.SaveCacheOutput(job.HashKey, stdout) // this saves the cache in strata.
 		}
 
 		log.Printf("worker %d completed the task...", id)
