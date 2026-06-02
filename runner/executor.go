@@ -13,43 +13,55 @@ import (
 	"github.com/google/uuid"
 )
 
-func RunSource(sourceCode string) (string, error) {
+func RunSource(sourceCode string) (string, string, error) {
 	fileName := fmt.Sprintf("%s.bl", uuid.New().String())
 	filePath := filepath.Join("workspace", fileName)
 
 	err := os.WriteFile(filePath, []byte(sourceCode), 0644)
 	if err != nil {
-		return "", fmt.Errorf("failed to write the codefile: %v", err)
+		return "", "", fmt.Errorf("failed to write the codefile: %v", err)
 	}
-
 	defer os.Remove(filePath)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	binaryName := "blan"
-	if runtime.GOOS == "windows" {
-		binaryName = "blan.exe"
-	}
-	binaryPath := filepath.Join(".", binaryName)
+	compilerPath := os.Getenv("BLAN_BINARY_PATH")
 
-	cmd := exec.CommandContext(ctx, binaryPath, filePath)
+	if compilerPath == "" {
+
+		exePath, err := os.Executable()
+		if err != nil {
+			return "", "", fmt.Errorf("failed to resolve server executable path: %w", err)
+		}
+
+		binaryName := "blan"
+		if runtime.GOOS == "windows" {
+			binaryName = "blan.exe"
+		}
+
+		compilerPath = filepath.Join(filepath.Dir(exePath), binaryName)
+	}
+
+	cmd := exec.CommandContext(ctx, compilerPath, filePath)
 
 	var out bytes.Buffer
 	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
 	cmd.Stdout = &out
+	cmd.Stderr = &stderr
 
 	err = cmd.Run()
 
+	outStr := out.String()
+	errStr := stderr.String()
+
 	if ctx.Err() == context.DeadlineExceeded {
-		return "", fmt.Errorf("execution timeout: possible infinite loop")
+		return outStr, errStr, fmt.Errorf("execution timeout: possibly infinite loop...")
 	}
 
 	if err != nil {
-		return "", fmt.Errorf("%s", stderr.String())
+		return outStr, errStr, fmt.Errorf("execution failed: %w", err)
 	}
 
-	return out.String(), nil
-
+	return outStr, errStr, nil
 }
