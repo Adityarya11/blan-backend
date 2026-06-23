@@ -14,7 +14,7 @@ func CompileHandler(g *gin.Context) {
 	var req models.CompileRequest
 
 	if err := g.ShouldBindJSON(&req); err != nil {
-		g.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid request Body"})
+		g.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 		return
 	}
 
@@ -22,10 +22,8 @@ func CompileHandler(g *gin.Context) {
 	if cacheOutput, exists := cache.GetCachedOutput(hashKey); exists {
 		g.JSON(http.StatusOK, models.CompileResponse{
 			Output: cacheOutput,
-			Error:  "",
-			// feature, add a `cached` flag (bool) to check/show that the response was from cached mem.
+			Cached: true,
 		})
-
 		return
 	}
 

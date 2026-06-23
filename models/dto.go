@@ -7,6 +7,7 @@ type CompileRequest struct {
 type CompileResponse struct {
 	Output string `json:"output"`
 	Error  string `json:"error,omitempty"`
+	Cached bool   `json:"cached"`
 }
 
 type CompileAcceptedResponse struct {
