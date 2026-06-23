@@ -16,13 +16,13 @@ func CreateSnippetHandler(c *gin.Context) {
 	var req CreateSnippetRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Request"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 		return
 	}
 
 	userID, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "userId lost"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "user identity missing from context"})
 		return
 	}
 
@@ -32,27 +32,27 @@ func CreateSnippetHandler(c *gin.Context) {
 	}
 
 	if err := database.DB.Create(&snippet).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save the code."})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save snippet"})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Code saved successfully", "snippet_id": snippet.ID})
+	c.JSON(http.StatusCreated, gin.H{"message": "snippet saved successfully", "snippet_id": snippet.ID})
 }
 
-func GetSnippetHandler(ctx *gin.Context) {
-	userID, exists := ctx.Get("user_id")
+func GetSnippetHandler(c *gin.Context) {
+	userID, exists := c.Get("user_id")
 	if !exists {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "UserID lost."})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "user identity missing from context"})
 		return
 	}
 
 	var snippets []models.Snippet
 	if err := database.DB.Where("user_id = ?", userID).Find(&snippets).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch the snippets."})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch snippets"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"count":    len(snippets),
 		"snippets": snippets,
 	})

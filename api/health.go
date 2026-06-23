@@ -10,6 +10,7 @@ import (
 
 func StrataHealthHandler(c *gin.Context) {
 	ok, details := cache.CheckStrataKV()
+
 	statusText := "ok"
 	statusCode := http.StatusOK
 	if !ok {
