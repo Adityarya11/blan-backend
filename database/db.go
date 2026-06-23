@@ -20,7 +20,7 @@ func Connect(dbconnect string) {
 
 	log.Println("Connected to the SQL")
 
-	err = DB.AutoMigrate(&models.User{}, &models.Snippet{}, &models.Job{})
+	err = DB.AutoMigrate(&models.User{}, &models.Snippet{})
 	if err != nil {
 		log.Fatalf("Failed to db migrations %v", err)
 	}
