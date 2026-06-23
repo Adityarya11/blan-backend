@@ -1,12 +1,25 @@
 package utils
 
 import (
+	"errors"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtSecret = []byte("this-is-a-secret-key")
+var jwtSecret []byte
+
+func InitJWT() error {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		return errors.New("JWT secret is not set in the environment.")
+	}
+
+	jwtSecret = []byte(secret)
+
+	return nil
+}
 
 type Claims struct {
 	UserID uint `json:"user_id"`
@@ -22,13 +35,12 @@ func GenerateToken(userID uint) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
 	return token.SignedString(jwtSecret)
 }
 
 func ValidateToken(tokenString string) (*jwt.Token, error) {
-	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+	return jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, jwt.ErrSignatureInvalid
 		}
 

@@ -6,6 +6,7 @@ import (
 	"blan-backend/database"
 	"blan-backend/middleware"
 	"blan-backend/runner"
+	"blan-backend/utils"
 	"log"
 	"net/http"
 	"os"
@@ -24,11 +25,19 @@ func main() {
 		log.Println("No .env file found, relying on the system environments.")
 	}
 
+	if err := utils.InitJWT(); err != nil {
+		log.Fatalf("JWT initialisation failed: %v", err)
+	}
+
 	dbconnect := os.Getenv("DATABASE_URL")
 	database.Connect(dbconnect)
 
 	cache.InitStrataKV("./strata_cache_data")
 	defer cache.CloseStrata()
+
+	if err := runner.InitWorkspace(); err != nil {
+		log.Fatalf("failed to initialise workspace directory: %v", err)
+	}
 
 	runner.InitWorkerPool(3, 100)
 
