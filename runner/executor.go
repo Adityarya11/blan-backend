@@ -13,6 +13,10 @@ import (
 	"github.com/google/uuid"
 )
 
+func InitWorkspace() error {
+	return os.MkdirAll("workspace", 0755)
+}
+
 func RunSource(sourceCode string) (string, string, error) {
 	fileName := fmt.Sprintf("%s.bl", uuid.New().String())
 	filePath := filepath.Join("workspace", fileName)
